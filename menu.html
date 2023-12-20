@@ -1,0 +1,195 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Gift</title>
+    <style>
+        @font-face {
+            font-family: 'ChristmasEve';
+            src: url('assets/christmaseve.ttf') format('truetype');
+        }
+
+        body {
+            display: none;
+            background-color: transparent;
+            font-family: 'ChristmasEve', sans-serif;
+        }
+
+        .menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30%;
+            height: 30%;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.699);
+            border: 5px solid #B22222;
+            border-radius: 25px;
+            box-shadow: 0px 0px 30px 2px #B22222;
+            padding: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px #B22222, 0 0 25px #B22222, 0 0 50px #B22222, 0 0 200px #B22222;
+            }
+
+            to {
+                box-shadow: 0 0 10px #B22222, 0 0 30px #B22222, 0 0 60px #B22222, 0 0 220px #B22222;
+            }
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #B22222;
+        }
+
+        h1 {
+            color: #B22222;
+            text-shadow: 0 0 5px #B22222, 0 0 10px #B22222, 0 0 15px #B22222, 0 0 20px #B22222;
+        }
+
+        img {
+            cursor: pointer;
+            width: 150px;
+            height: 150px;
+        }
+
+        .wait {
+            color: #B22222;
+            display: none;
+            margin-top: 20px;
+            font-family: 'sans-serif', sans-serif;
+        }
+
+        .snowflake {
+            position: fixed;
+            background: url('assets/snowfl.png') no-repeat center center/cover;
+            user-select: none;
+            z-index: 9999;
+            pointer-events: none;
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            animation: fall 5s linear infinite;
+        }
+
+        .snowflakes span {
+            position: absolute;
+            display: block;
+            width: 10px;
+            height: 10px;
+            background: url('assets/snowfl.png') no-repeat center center/cover;
+            animation: fall 5s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                top: -10%;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        @keyframes snowflakes-shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(8px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="snowflakes">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+
+    <div class="menu">
+        <span class="close" onclick="closeMenu()">×</span>
+        <h1>🎄 Merry Christmas! 🎄</h1>
+        <img src="assets/gift.png" onclick="addBonus(); playAudio();" />
+        <p class="wait"></p>
+    </div>
+    <audio id="myAudio">
+        <source src="assets/xmas.mp3" type="audio/mpeg">
+    </audio>
+</body>
+
+<script>
+
+    function createSnowflake() {
+        const snow_flake = document.createElement('div');
+        snow_flake.style.left = Math.random() * 100 + 'vw';
+        snow_flake.style.animationDuration = Math.random() * 2 + 3 + 's';
+        snow_flake.style.opacity = Math.random();
+        snow_flake.className = 'snowflake';
+        document.body.appendChild(snow_flake);
+        setTimeout(() => {
+            snow_flake.remove();
+        }, 5000);
+    }
+    setInterval(createSnowflake, 100);
+
+    function closeMenu() {
+        fetch(`https://${GetParentResourceName()}/exit`, { method: 'POST' })
+            .catch((error) => console.error('Error:', error));
+        document.body.style.display = 'none';
+    }
+    function addBonus() {
+        fetch(`https://${GetParentResourceName()}/addBonus`, { method: 'POST' })
+            .catch((error) => console.error('Error:', error));
+    }
+
+    function playAudio() {
+        var x = document.getElementById("myAudio");
+        x.play();
+    }
+    window.onload = function () {
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'ui') {
+                if (event.data.status == true) {
+                    document.body.style.display = 'block';
+                } else {
+                    document.body.style.display = 'none';
+                }
+            }
+            if (event.data.type === 'wait') {
+                var hours = Math.floor(event.data.timeLeft / 3600);
+                var minutes = Math.floor((event.data.timeLeft % 3600) / 60);
+                var seconds = event.data.timeLeft % 60;
+                document.querySelector('.wait').textContent = '🎅 You must wait ' + hours + ' hours, ' + minutes + ' minutes and ' + seconds + ' seconds to claim this again. 🎅';
+                document.querySelector('.wait').style.display = 'block';
+            }
+        });
+    };
+</script>
+
+</html>
